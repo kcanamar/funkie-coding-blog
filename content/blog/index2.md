@@ -1,8 +1,8 @@
 ---
 author: "KCanamar"
-date: "2023-03-20"
+date: "2023-03-23"
 title: "All About Content"
-lang: "Javascript Go"
+lang: "javascript"
 
 ---
 

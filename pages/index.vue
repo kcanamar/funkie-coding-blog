@@ -1,3 +1,9 @@
+<script setup>
+// create a query variable looking into the content/blog directory
+const contentQuery = await queryContent('blog').sort({ date: -1 }).find()
+
+</script>
+
 <template>
     <div class="grid h-screen place-content-center gap-3 text-center">
             <h1 class="text-5xl text-blue-500">Welcome to Funkie Coding</h1>
@@ -14,16 +20,23 @@
                 <h2 id="recent" class="text-3xl font-semibold tracking-tight text-grey-900 sm:text-4xl">
                     Recent Posts
                 </h2>
-            </div> 
-            <div class="mt-12 grid gap-16 lg:grid-cols-2 lg:gap-x-5 lg:gap-y-12">
+            </div>
+
+            <!-- reset the query param -->
+            <!-- <div class="grid my-4 place-content-center text-center">
+                <nuxt-link href="#recent" class="mx-auto rounded-xl bg-teal-800 px-20 py-4 text-white">
+                    Go Back
+                </nuxt-link>
+            </div> -->
+
+            <div class="mt-12 grid gap-16 lg:grid-cols-3 lg:gap-x-5 lg:gap-y-12">
 
                 <!-- https://content.nuxtjs.org/api/components/content-list  -->
-
-                <ContentList path="/blog" v-slot="{ list }">
+                <!-- https://content.nuxtjs.org/api/composables/query-content -->
 
                     <!-- creates a loop over all content -->
                     <div 
-                        v-for="article in list" 
+                        v-for="article in contentQuery" 
                         :key="article._path" 
                         class="flex flex-col justify-between rounded-lg border border-gray-300 p-4"
                     >
@@ -33,15 +46,19 @@
                         </nuxt-link> 
 
                         <div class="mt-6">
-                            <p class="text-sm font-medium text-gray-900">
-                                {{article.author}}
-                            </p>
+                            <div class="flex justify-between">
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{article.author}}
+                                </p>
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{article.lang}}
+                                </p>
+                            </div>
                             <div class="text-sm text-gray-500">
                                 <time datetime="2023-03-06">{{article.date}}</time>
                             </div>
                         </div>
                     </div>
-                </ContentList>
             </div>
         </div>
     </main>

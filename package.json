@@ -13,5 +13,8 @@
     "nuxt": "^3.2.3",
     "prettier": "^2.8.4",
     "prettier-plugin-tailwindcss": "^0.2.4"
+  },
+  "dependencies": {
+    "vb-radio": "^1.0.0"
   }
 }

@@ -8,16 +8,29 @@
 
     <!-- https://content.nuxtjs.org/api/components/content-doc -->
 
-    <ContentDoc class="" v-slot="{ doc }">
-      <h2 class="text-2xl font-semibold">{{ doc.title }}</h2>
-      <p class="mb-8 text-gray-500">
-        by, {{ doc.author }}, {{ doc.date }}
-      </p>
-      <div
-        class="prose prose-lg first-letter:text-7xl first-letter:text-blue-600"
-      >
-        <ContentRenderer :value="doc" />
-      </div>
+    <ContentDoc class="" >
+      <template v-slot="{ doc }">
+        <h2 class="text-2xl font-semibold">{{ doc.title }}</h2>
+        <p class="mb-8 text-gray-500">
+          by, {{ doc.author }}, {{ doc.date }}
+        </p>
+        <div
+          class="prose prose-lg first-letter:text-7xl first-letter:text-blue-600"
+        >
+          <ContentRenderer :value="doc" />
+        </div>
+      </template>
+      <template #not-found>
+        <div class="grid h-screen place-content-center gap-3 text-center">
+          <h1 class="text-5xl text-blue-500">Oops.. I have not wirtten that, yet.</h1>
+          <p class="text-xl text-red-600">
+            Check back soon or send me a request on a topic you would like me to cover.
+          </p>
+          <nuxt-link href="https://kcanamar-portfolio.vercel.app/contact" target="_blank" class="mx-auto rounded-xl bg-teal-800 px-20 py-4 text-white">
+              Contact Me 
+          </nuxt-link>
+  </div>
+      </template>
     </ContentDoc>
   </main>
 </template>
