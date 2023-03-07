@@ -1,3 +1,9 @@
+---
+author: "KCanamar"
+date: "2023-March-6"
+title: "All About Content"
+---
+
 # Nuxt Content
 Use `<!--more-->` to set the description text, anything above will be a description
 <!-- more -->
