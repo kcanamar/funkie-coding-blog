@@ -6,7 +6,7 @@ const contentQuery = await queryContent('blog').sort({ date: -1 }).find()
 
 <template>
     <div class="grid h-screen place-content-center gap-3 text-center">
-            <h1 class="text-5xl text-blue-500">Welcome to Funkie Coding</h1>
+            <h1 class="text-5xl text-blue-500">Welcome to KyleCanBlog</h1>
             <p class="text-xl text-red-600">
                 Check out the latest blog posts from KCanamar
             </p>
