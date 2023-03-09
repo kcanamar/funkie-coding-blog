@@ -1,11 +1,9 @@
 ---
 author: "KCanamar"
-date: "2023-01-06"
-title: "All About Content"
-lang: "Javascript"
+date: "2023-03-06"
+title: "Tailwind Markdown Example"
+lang: "Markdown"
 ---
-
-# About Content v2
 
 Hello, this is a [Markdown]{.px-1 .bg-blue-200 .rounded-lg} file!
 ::div{.w-full .bg-green-200 .p-4}
