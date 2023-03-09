@@ -1,5 +1,5 @@
 <template>
-  <main class="relative mx-auto max-w-prose overflow-hidden bg-white py-16 px-4 sm:px-6 lg:px-8">
+  <main class="relative mx-auto max-w-max overflow-hidden bg-white py-16 px-4 sm:px-6 lg:px-8">
     <div class="mb-8">
       <nuxt-link class="mx-auto rounded-xl bg-teal-800 px-8 py-4 text-white" href="/#recent">
         Go Back

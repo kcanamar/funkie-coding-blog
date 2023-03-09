@@ -6,7 +6,7 @@ lang: "Go"
 ---
 
 So you want to build an api with GO? Let's do it. The following is a step by step guide on how to build a full CRUD api using Gin. Then we will go one step futher and deploy our api to Render.com.
-
+<!-- more -->
 ### Prerequisites
 There are not that many just the normal housekeeping so we can code together.
 - Have VsCode or a text editor - [Download VsCode](https://code.visualstudio.com/)
