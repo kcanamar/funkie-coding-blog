@@ -1,7 +1,7 @@
 ---
 author: "KCanamar"
 date: "2023-03-08"
-title: "Golang, Gin, Gorm, Bit.io"
+title: "Building a CRUD API with Golang, Gin, Gorm, Bit.io, Bonus Deployment to Render.com"
 lang: "Go"
 ---
 
@@ -10,7 +10,11 @@ So you want to build an api with GO? Let's do it. The following is a step by ste
 ### Prerequisites
 There are not that many just the normal housekeeping so we can code together.
 - Have VsCode or a text editor - [Download VsCode](https://code.visualstudio.com/)
-- You are going to need Golang installed on your machine - [Download Golang](https://go.dev/dl/)
+- Need Golang installed on your machine - [Download Golang](https://go.dev/dl/)
+- Register for a FREE account with [Bit.io](https://bit.io/)
+- Register for a FREE account with [Render.com](https://render.com/)
+- Have Postman or equivalent installed on your machine [Postman](https://www.postman.com/downloads), Dont use the browser based Api Tests they will not work with `localhost` development
+- Need a Github Account to host your code. [Github](https://github.com/signup)
 
 I will be linking along the way the links to relevant documentation in case you run into any errors or need futher clarification. Look for these [_Check The Docs_]() along the way.
 
@@ -67,7 +71,7 @@ code .
 
 ***Note*** - Be sure to have the Go extension for vscode _[Check the Docs](https://code.visualstudio.com/docs/languages/go)_
 
-## Start here if you are familiar with setting up your go projects, and having it open in VsCode
+### Start here if you are familiar with setting up your go projects, and having it open in VsCode
 
 Now since we are going to be deploying this on render.com we are going to need to make sure that we initialize a git repo in our project directory. We do this by running the folowing command.
 
@@ -75,12 +79,19 @@ Now since we are going to be deploying this on render.com we are going to need t
 git init
 ```
 
+Now we should make our first commit to start our git history. rRuning the following commands
+
+```bash
+git add .
+git commit -m "first commit"
+```
+
 Now we need to create the go equivalent of a `package.json` , might seem similar if you are coming from `node.js` . The `go.mod` acts as our package manager, this is where we will be installing all of our dependencies for this project. So let us opne up a terminal in vscode in our project directory and run the following command.
 ```bash
 go mod init
 ```
 
-## Here come the Packages
+### Here come the Packages
 
 We are goin to be using `CompileDaemon` to watch `.go` files and invokes `go build` if a file changed, _[Check the Docs](https://github.com/githubnemo/CompileDaemon)_ , again another `node.js` reference this will be similar to `nodemon` 
 ```bash
@@ -115,7 +126,7 @@ We are going to need add a second part of `GORM` this will be the postgreSQL dri
 go get -u gorm.io/driver/postgres
 ```
 
-## Finally, we can start writing some code
+### Finally, we can start writing some code
 
 Lets keep it going by staying in the terminal for a little longer, create a main.go file in the projects root directory.
 
@@ -170,6 +181,8 @@ func main() {
 }
 ```
 
+In our browser, I am using Chrome, lets navigate to `localhost:3000` and confirm we see our message.
+
 Since we are going to deploying this we are going to want to setup our `dotenv` package by touching a `.env` file into the root directory along with a `.gitignore` that way our `git commit` doesn't expose our environment variables, if you have a global `.gitignore` you are ahead of the game.
 
 ```bash
@@ -213,7 +226,8 @@ func init() {
 func main(){ ...
 ```
 
-Now to keep our code looking polished lets move this env section in our `init()` to its own file, we start this by adding a new directory into root directory of the project
+Now to keep our code looking polished lets move this env section in our `init()` to its own file, we can start this by adding a new directory into root directory of the project. 
+
 ```bash 
 mkdir initializers
 ```
@@ -224,7 +238,7 @@ Then lets add a file to hold our code.
 touch initializers/loadEnv.go
 ```
 
-Now we can relocate the init functions contents to `initializers/loadEnv.go` and beef it up a little more, we are going to check our file path for our environment variables since deploying on render.com has its own challenges, and this will. make sure that our deployment goes smooth. _[Check the Docs](https://stackoverflow.com/questions/54456186/how-to-fix-environment-variables-not-working-while-running-from-system-d-service)_
+Now we can relocate the init functions contents to `initializers/loadEnv.go` and beef it up a little more, we are going to check our file path for our environment variables since deploying on render.com has its own challenges, and this will make sure that our deployment goes smooth. _[Check the Docs](https://stackoverflow.com/questions/54456186/how-to-fix-environment-variables-not-working-while-running-from-system-d-service)_
 
 ```go
 //loadEnv.go
@@ -262,7 +276,7 @@ func LoadEnv() {
 }
 ```
 
-We should reconnect our environment variables, for this we will need to import this function into main.go
+After we have setup  provide our environment variables to our server, for this we will need to import the `initializers` package into main.go.
 
 ```go
 //main.go
@@ -280,14 +294,23 @@ func init() {
 }
 ...
 ```
+# Connect to Bit.io
 
-Now lets connect a database, touch another file into the initializers directory `touch initializers/database.go
+Now lets connect a database, touch another file into the initializers directory
+
+```bash
+touch initializers/database.go
+```
 
 For this connection we will be using `bit.io` as our database, bit.io software is _a platform used to secure Postgres database_. 
-If you do not have a bit.io account head over to 
-Once the database is setup we are going to select the connect opiton to display our connection information.
+If you do not have a bit.io account head over to bit.io and create a free account [here](https://bit.io/)
 
-Now that we have our database setup and on the connection screen lets setup `database.go`
+Now you that you have created/ logged in to your `bit.io` account, you will see a button by the top left of the dashboard labeled `+ new`. For the purposes of this walkthough you can name this database however you like. 
+
+Once the database is setup we are going to select the connect opiton. You will find this near the top right of the screen, once selected our dashboard will now display our connection information.
+Be sure to leave this tab open.
+
+Now that we have our database setup and on the connection screen lets setup `database.go`, first we should delcare what package this file belongs to, and import our Gorm dependencies.
 
 ```go
 //database.go
@@ -301,18 +324,15 @@ import (
 
 func ConnectDB() {
 
-	dsn := "host={Hostname} user={Username} password={API Key/Password} dbname={Database name} port={PORT} sslmode=allow"
+	dsn := "{your postgresql connection string}?sslmode=allow"
 
 }
 ```
+_*IMPORTANT*_ - we need to add the query parameter `sslmode` and set the value to `allow`, this is due to the security setting associated with `bit.io` [_Check the Docs_](https://www.postgresql.org/docs/current/libpq-ssl.html)
 
-// * Todo Edit From Here Down * //
-
-37. From the bit.io connection information we can see that variables we need to use for completing the connection string, make sure that the `sslmode` is assigned `require` due to bit.io security settings.
-38. Next we will create a global variable to access in any of the files `var DB *gorm.DB` 
-39. Then we need to create a error variable local scoped to our `ConnectDB()` function `var err error` 
-40. Next we need to asign the variables we have created to the connection
-41. Now we need to handle our errors if any responding with a `log.Fatal("Failed to connect to the database")`
+Next we will create a global variable to access in any of the files `var DB *gorm.DB`
+Then we need to impement some error handling local scoped to our `ConnectDB()` function `var err error` 
+Next we are going to asign the variables we have created to the result of our connection attempt, handling our errors if any with a fatal response `log.Fatal("Failed to connect to the database")` [_Check the Docs_](https://gorm.io/docs/connecting_to_the_database.html#PostgreSQL)
 
 ```go
 //database.go
@@ -330,7 +350,7 @@ func ConnectDB() {
 	// create local scoped error
 	var err error
 	
-	dsn := "host={Hostname} user={Username} password={API Key/Password} dbname={Database name} port={PORT} sslmode=allow"
+	dsn := "{your postgresql connection string}?sslmode=allow"
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	
 	// error handling
@@ -340,9 +360,20 @@ func ConnectDB() {
 }
 ```
 
-Now that we have all of this running when we check our termial running compiledaemon we should see no errors. However if you do please go back and check for syntaxing errors.
-Now we should not have our database connection string out in the open, so lets relocate that string to our `.env` file under the name `DATABASE_URL`
-Now we use that variable instead of the connection string with `os.Getenv("Variable_Name")`
+Now that we have all of this running when we check our termial running compiledaemon we should see no errors. However if you do encounter one please go back and check for syntaxing errors, or consult the supporting documentation provided at each step.
+
+No error, let's go! Since we are currently exposing our database connection string, a huge security risk, let's relocate that string into our `.env` file with a key name of `DATABASE_URL`
+
+```env
+// .env
+
+PORT=3000
+ENV="development"
+DATABASE_URL={your postgresql connection string}
+
+```
+
+Now we use that variable is safely hidden in our environment variables, lets up date our code to use our connection string with `os.Getenv("Variable_Name")`
 
 ```go
 //database.go
@@ -354,26 +385,39 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
-// create a global variable for Database
 var DB *gorm.DB
 
 func ConnectDB() {
-	// create local scoped error
 	var err error
+
 	// .env variable
 	dsn := os.Getenv("DATABASE_URL")
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	// error handling
+
 	if err != nil {
 		log.Fatal("Failed to connect to database")
 	}
 }
 ```
-45. With the database connected, lets move on and create some models for our data, first `mkdir models` in the projects root directory
-46. `touch postModel.go` in the `models` directory
+
+With the database connected, lets move on and create some models for our data, for this we will need to add a models directory in the project's root directory.
+
+```bash
+mkdir models
+```
+
+Next 
+
+```bash
+touch models/postModel.go
+```
+
+We are going to be embedding the `gorm.model` to include our `ID, CreatedAt, UpdatedAt, DeletedAt` fields to our struct with our haing to write them all out, thank you gorm. [_Check the Docs_](https://gorm.io/docs/models.html#gorm-Model)
+
+We are going to add two more fields to our struct, since this is a `Post` it should have at minimum a `Title` and `Body` both as string datatypes.
+
 ```go
 // postModel.go
-// https://gorm.io/docs/models.html
 package models
 
 import "gorm.io/gorm"
@@ -384,12 +428,28 @@ type Post struct {
 	Body string
 }
 ```
-47. Now that we have a model, we need to migrate to our database, in the root directory in terminal  `mkdir migrate`, then `touch migrate/migrate.go`
+
+Now that we have a model setup, we need to migrate to our database. Todo this we are going to create, you guessed it, another directory in the root directory `mkdir migrate`, then `touch migrate/migrate.go`
+
+```bash
+mkdir migrate
+```
+
+Then
+
+```bash
+touch migrate/migrate.go
+```
+
+Now that we have our file created lets add some dependencies. First we are going to need our `initializers` package, this will enable us to access both `LoadEnv()` and `ConnectDB()` funcs from with in `migrate.go`'s init func. Second we are going to need our `models` package, pretty straight forward, this will describe the shape our data(schema) must be in to reach the database.
+Finally in our main func we are going to utilize our global `DB` variable to `AutoMigrate` our data. [_Check the Docs_](https://gorm.io/docs/index.html#Quick-Start)
+
 ```go
 // migrate.go
 package main
 
 import (
+	// Import dependencies
 	"github.com/kcanamar/go-gin-bit-crud/initializers"
 	"github.com/kcanamar/go-gin-bit-crud/models"
 )
@@ -401,42 +461,63 @@ func init() {
 }
 
 func main() {
-	// auto migrate - https://gorm.io/docs/index.html
 	// AutoMigrate takes a model struct argument
 	initializers.DB.AutoMigrate(&models.Post{})
 }
 ```
-48. Once the migrte file is all setup lets migrate with command `go run migrate/migrate.go`, so long as there are no errors we will see the table created in the `data` section of bit.io. Take a moment to celebrate, we have just now setup up our API, now off to create some CRUD.
-50. Lets navigate in our terminal to the project root directory and `mkdir controllers` and then`touch controllers/postCtrl.go` , Ctrl is my shorthand for Controller.
-51. In `postCtrl.go` we will be defining the route controls for GET, POST, PUT, and DELETE requests related to our post model.
+
+Once the migrte file is all setup lets migrate with command 
+
+``` bash
+go run migrate/migrate.go
+```
+# Create
+
+So long as there are no errors we will see the table created in the `data` section of bit.io. Take a moment to celebrate, we have just now completed setting up our API with Bit.io. Now off to do some CRUD operations with our `Post` model.
+
+I know what you are going to say, "KCan, are we really going to make another directory?", short answer - Yup. With our terminal in the project root directory
+
+```bash
+mkdir controllers
+``` 
+
+and then
+
+```bash
+touch controllers/postCtrl.go
+```
+
+In `postCtrl.go` we will be defining the route controls for GET, POST, PUT, and DELETE requests related to our post model. We will start off by gathering our dependencies, from `Gin`. Then start our process with the "C" in CRUD, Create. Let's take a small step first by, sending back a successful message when the `PostsCreate` controller is called.
+
 ```go
 // postCtrl.go
 package controllers
 
 import "github.com/gin-gonic/gin"
 
-func PostsCreate (c *gin.Context) {
+func PostsCreate(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Hello from the other side!",
 	})
 }
 ```
-51. First we need to connect to our database, the mount the controllers with our server, so we relocate the message from our home route to our `PostsCreate` func, *Important* The naming convention to be able to use your functions in other file, much be PascalCase.
+
+Next, we need to connect the server to our database, then mount the controllers within our server. We are going to need to import our `controllers` package. Since we already have the `initializers` package imported we already have access to `ConnectDB()`. Now in our home route, lets add in our newly created controller and check to make sure that everything is function as intended.
+
 ```go
 // main.go
 package main
 
 import (
 	"os"
-
 	"github.com/gin-gonic/gin"
+
+	// import controller package
 	"github.com/kcanamar/go-gin-bit-crud/controllers"
 	"github.com/kcanamar/go-gin-bit-crud/initializers"
 )
 
 func init() {
-	// load the env variables
-	// add ENV="development" to your .env
 	if os.Getenv("ENV") != "production" {
 		initializers.LoadEnv()
 	}
@@ -445,19 +526,16 @@ func init() {
 }
 
 func main() {
-	// setup router
 	router := gin.Default()
 	
 	// include the contoller
 	router.GET("/", controllers.PostsCreate)
 	
-	// server listener
 	router.Run()
 }
 ```
 
-Lets make sure that we prepare our init func for depolyment so we are going to wrap the `initializers.LoadEnv()` in a coditional checking for the .env variable `ENV` this will make things easier when we depoly to Render.com later
-Check to make sure the server is giving use the feedback we want. 
+Lets head over to `localhost:3000` to make sure the server is giving use the feedback we want. 
 Now lets modify our code to send some data using a POST request
 
 ```go
@@ -465,19 +543,24 @@ Now lets modify our code to send some data using a POST request
 ...
 
 func main() {
-	// router
 	router := gin.Default()
 	
-	// Create Route
+	// Create Route should use a POST http verb
 	router.POST("/posts", controllers.PostsCreate)
 	
-	// server listener
 	router.Run()
 }
 ```
 
-Now lets refactor out code in `postCtrl.go` so we can send data to our database with a payload
-First step we need to test createing a post with some hardcoded values then we will send requests and use the request body data to create new posts
+Now that we are using the right Http grammer, lets head to `postCtrl.go` to refactor our code so we can send data to our database with a payload.
+
+First let's go ahead and create a new struct `reqBody` based on our model to hold the request information. Once we have our `reqBody` struct we need to bind our JSON data with it, we achieve this by calling the `Bind` method from `*gin.context`, passing a pointer to our `reqBody` struct. [_Check the Docs_](https://gin-gonic.com/docs/examples/binding-and-validation/)
+
+Second we are going to use our `reqBody` to populate a `newPost` struct based on our `Post` model[_Check the Docs_](https://gorm.io/docs/create.html#Create-Record). Now that we have our `newPost` built from our `reqBody` we need to send this data to our database, creating the new post. This will be achieved by creating a variable `result` and assinging it the result of Gorm's `.Create` method with the argument of a pointer to `newPost`.
+
+Third, we need to implement some error handling incase something unexpected happens.
+
+Lastly, we will respond with a 200 status and provide postive feedback with the newly created posts data.
 
 ```go
 // postCtrl.go
@@ -491,11 +574,19 @@ import (
 
 func PostsCreate(c *gin.Context) {
 
-	// Get data off request body
+	// Get data from request body
+	// create variable
+	var reqBody struct {
+		Title string
+		Body string
+	}
 
-	// Create a post - https://gorm.io/docs/create.html#Create-Record
-	post := models.Post{Title: "Yes", Body: "We did it!"}
-	result := initializers.DB.Create(&post)
+	// parse the request body as JSON then binds to reqBody via a pointer
+	c.Bind(&reqBody)
+
+	// Create a newPost 
+	newPost := models.Post{Title: reqBody.Title, Body: reqBody.Body}
+	result := initializers.DB.Create(&newPost)
   
 	// handle error from result
 	if result.Error != nil {
@@ -505,35 +596,23 @@ func PostsCreate(c *gin.Context) {
 	// return post
 	c.JSON(200, gin.H{
 		// send back a confirmation of the post
-		"post": post,
+		"newPost": newPost,
 	})
 }
 ```
 
-Confirm that we see the data in our database! okay hardocded example out of the way, on to refactoring to use the request body.
-First let's go ahead and create a new struct based on our model to hold the request information.
+Time to test, open up postman so we can send a JSON body to our local host server. In post man we are going to create a new `POST` request to `localhost:3000/posts` sending a `body` as `raw` data in a `JSON` format. Once we have the proper settings selected, and populated our request body payload, send the request.
+*Note* - If you are struggling to send your request [_Check the Docs_](https://www.youtube.com/watch?v=qyYAOty_bDs)
 
-```go
-// postCtrl.go
-...
-func PostCreate(c *gin.Context){
+We see that it is created! Happy dance!
 
-	// Get Data off request body
-	// https://gin-gonic.com/docs/examples/binding-and-validation/
-	// create variable
-	var reqBody struct {
-		Title string
-		Body string
-	}
-	// parse the request bodyas JSON then binds to variable reqBody
-	c.Bind(&reqBody)
+# Read
 
-...
-}
-```
+Let's keep that momentum going, onto the "R" in CRUD, this is going to be split up into two different routes. One to find all of the posts, and another to find just a single post.
 
-Test, it out by opening up postman, thunderclient or even a curl request to send a JSON body to our local host server. We see that it is created! On to the Index controller!
-Let's make a new function in our `postCtrl.go` file called `PostsIndex`  and here we will be getting all of the posts from our database and sending them back in the response as JSON.
+Let's kick it off by making a new function in our `postCtrl.go` file called `PostsIndex` and here we will be getting all of the posts from our database and sending them back in the response as JSON.
+
+Similar to our `PostsCreate` func we need to create an array variable `allPosts` typed of our `Post` model, this will hold all of our posts. Once we have our variable we are going to use the Gorm method `.Find` to query our database, passing the argument of a pointer to `allPosts`. Finally we will respond with all of our posts. [_Check the Docs_](https://gorm.io/docs/query.html#Retrieving-all-objects)
 
 ```go
 // postCtrl.go
@@ -541,9 +620,7 @@ Let's make a new function in our `postCtrl.go` file called `PostsIndex`  and her
 ...
 
 func PostsIndex(c *gin.Context){
-	// https://gorm.io/docs/query.html#Retrieving-all-objects
 	
-	// Get all posts
 	// variable to hold posts
 	var allPosts []models.Post
 
@@ -557,28 +634,31 @@ func PostsIndex(c *gin.Context){
 }
 ```
 
-Let's now include this in our routes
+Let's now update our router with this new route, back to `main.go`.
 
 ```go
 // main.go
 
 func main() {
-	// router
 	router := gin.Default()
 
 	// Index Route
 	router.GET("/posts", controllers.PostsIndex)
 
-	// Create Route
 	router.POST("/posts", controllers.PostsCreate)
 	
-	// server listener
 	router.Run()
 }
 ```
 
-Check to make sure this works by sending a GET request to localhost:3000/posts, we should see a JSON object with a key of "posts" with a value of an array of posts. Most excellent!
-Now let us go and get a sinlge post for our Show route, head back to `postCtrl.go` and lets create another func `PostShow` 
+Check to make sure this works by sending a `GET` request, in postman to `localhost:3000/posts`. 
+We should see a JSON object with a key of "posts" with a value of an array of posts. 
+
+*Air Guitar* Most excellent!
+
+Now that we can get all of the posts, let focus in to go and get a sinlge post for our Show route, head back to `postCtrl.go` and lets create another func `PostShow`. 
+
+Now that we have seen the pattern a few times, lets recreate it one more time. Create a variable `post` type of `models.Post`. Next we will use the Gorm method `.First` passing in two arguments. the first argument with be a pointer to the `foundPost` variable, and the second argument will be the `id` of the post provided by the request parameters. Finally responding with the `foundPost`. [_Check the Docs_](https://gorm.io/docs/query.html#Retrieving-objects-with-primary-key)
 
 ```go
 // postCtrl.go
@@ -586,23 +666,21 @@ Now let us go and get a sinlge post for our Show route, head back to `postCtrl.g
 ...
 
 func PostShow(c *gin.Context){
-	// https://gorm.io/docs/query.html#Retrieving-objects-with-primary-key
-	// Get single post
 	
 	// variable to hold post
-	var post models.Post
+	var foundPost models.Post
 
 	// Query the database
-	initializers.DB.First(&post, c.Param("id"))
+	initializers.DB.First(&foundPost, c.Param("id"))
 
 	// Response
 	c.JSON(200, gin.H{
-		"post": post
+		"post": foundPost
 	})
 }
 ```
 
-Add a show route into `main.go`
+How about we add the show controller to our router. We're going, going, back, back to `main.go`.
 
 ```go
 // main.go
@@ -611,33 +689,39 @@ Add a show route into `main.go`
 
 func main() {
 
-	// setup a gin router
-	r := gin.Default()
+	router := gin.Default()
 
-	// Home Route
-	r.GET("/", func(c *gin.Context) {
+	// Added in the home route just to have a route route for testing the API
+	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Hello from the other side!",
 		})
 	})
 
-	// Index Route
-	r.GET("/posts", controllers.PostsIndex)
-
-	// Create Route
-	r.POST("/posts", controllers.PostCreate)
+	router.GET("/posts", controllers.PostsIndex)
+	router.POST("/posts", controllers.PostCreate)
 
 	// Show Route
-	r.GET("/posts/:id", controllers.PostShow)
+	router.GET("/posts/:id", controllers.PostShow)
 
-	// setup our server listener
-	r.Run()
+	router.Run()
 
 }
 ```
 
-Test that out by sending a GET request to `localhost:3000/posts/1` and we should expect to see the post with `id=1` 
-Almost there lets update a post now, back to `postCtrl.go`
+Time to test that out by sending a GET request to `localhost:3000/posts/1` and we should expect to see the post with `id=1`. 
+
+# Update
+
+Go ahead and Celebrate 2/4 of the way through CRUD.
+
+Almost there lets update a post now, back to `postCtrl.go` to create our update controller. In this example lets showcase that we can obtain the request parameter another way, for this we will create a variable `id` assigned with the request param `id`. Next we need to create a variable for our `reqBody` again referencing the `Post` models properties. We are also going to need a variable to represnt our `Post` model.
+
+First we query the database to find the post to updated we will be using Gorm's `.Find` method with two arguements, first argument will be a pointer to the `Post` model variable, second argument will be the `id` variable.
+
+Then we are going to chain some Gorm methods together starting with `.Model` with the argument of a pointer to `updatedPost`. Next method in this chain will be `.Update` passing the argument of a struct typed of our model `Post` populated with our data from the `reqBody` variable.[_Check the Docs_](https://gorm.io/docs/update.html#Updates-multiple-columns)
+
+Finishing this off by responding with the `updatedPost`.
 
 ```go
 // postsCtrl.go
@@ -649,57 +733,60 @@ func PostUpdate(c *gin.Context){
 	id := c.Param("id")
 	
 	// Get the request body
-	var body struct {
+	var reqBody struct {
 		Title string
 		Body string
 	}
 	
 	// Find post to be updated
-	var post models.Post
-	initializers.DB.Find(&post, id)
+	var updatedPost models.Post
+	initializers.DB.Find(&updatedPost, id)
 	
-	// https://gorm.io/docs/update.html#Updates-multiple-columns
 	// Update Post
-	initializers.DB.Model(&post).Updates(models.Post{
-		Title: body.Title,
-		Body: body.Body,
+	initializers.DB.Model(&updatedPost).Updates(models.Post{
+		Title: reqBody.Title,
+		Body: reqBody.Body,
 	})
 	
-	// Response with updated post
+	// Respond with updated post
 	c.JSON(200, gin.H{
-		"updatedPost": post
+		"post": updatedPost
 	})
 }
 ```
 
-Now to update `main.go`
+Now, you guessed it, update our router in `main.go` with the new controller
 
 ```go
 // main.go
 
 ...
-	// Create Route
-	r.POST("/posts", controllers.PostCreate)
+	router.GET("/posts", controllers.PostsIndex)
+	router.POST("/posts", controllers.PostCreate)
 
 	// Update Route
 	r.PUT("/posts/:id", controllers.PostUpdate)
 
-	// Show Route
 	r.GET("/posts/:id", controllers.PostShow)
 ...
 ```
 
-Test, and confirm by sending a JSON body as a PUT request to `localhost:3000/posts/1` 
-
+Time to test, using postman send a `JSON` body as a `PUT` request to `localhost:3000/posts/1`. 
 ```js
 // Request body
 {
 	"title": "updated"
 }
 ```
+_Note_- You can update any number of properties defined in the request body, or just one.
 
-_Note_ you can update any number of properties defined in the request body, or just one.
-Now lets DELETE a post to round out our C.R.U.D. Operations, back to `postCtrl.go`
+*Air Horn* Let's GO, we should see our post updated with the new title.
+We are right there 3/4 of CRUD complete, 4th Quarter, 90th Minute, let finish strong.
+
+# Delete
+
+Now lets `DELETE` a post to round out our C.R.U.D. Operations, back to `postCtrl.go`. 
+This is a fairly straight forward controller, we are going to access the Grom method `.Delete` passing two arguments. First argument will be a pointer to our `Post` model, with the second argument being the request param `id` of the post to be deleted. All that is left is responding with a success method. [_Check the Docs_](https://gorm.io/docs/delete.html#Delete-with-primary-key)
 
 ```go
 // postCtrl.go
@@ -707,12 +794,8 @@ Now lets DELETE a post to round out our C.R.U.D. Operations, back to `postCtrl.g
 ...
 
 func PostDestroy(c *gin.Context) {
-	// Get id from params
-	id := c.Param("id")
-
-	// https://gorm.io/docs/delete.html#Delete-with-primary-key
 	// Delete the post
-	initializers.DB.Delete(&models.Post{}, id)
+	initializers.DB.Delete(&models.Post{}, c.Param("id"))
 
 	// Response
 	c.JSON(200, gin.H{
@@ -722,41 +805,80 @@ func PostDestroy(c *gin.Context) {
 }
 ```
 
-Add in our Route to `main.go`
+Another one bites the dust, time to add out controller to our router in `main.go`.
 
 ```go
 // main.go
 ...
-	// Create Route
 	r.POST("/posts", controllers.PostCreate)
-
-	// Update Route
 	r.PUT("/posts/:id", controllers.PostUpdate)
 	
 	// Delete Route
 	r.DELETE("/posts/:id", controllers.PostDestroy)
 
-	// Show Route
 	r.GET("/posts/:id", controllers.PostShow)
 ...
 ```
 
+Time to test, using postman send a `DELETE` request to `localhost:3000/posts/1`.
 
+# CRUD Complete
 
-# Deployment
-1. Now that the app is built lets deploy it to render.com
-2. Create a render.com account and choose the free teir
-3. We are going to create a new web service
-4.  If you are hosting your site on github.com we can import our repo from there, scroll through the options until you find your project name and click connect.
-5.  Render will ask you to give your porject a name
-6. Now let's chose the advanced setting to set up our environment variables
-7. . https://render.com/docs/environment-variables
-8. We need to define our enviornment variables, so in YOUR local `.env` we have these variables defined, however when we depoly using render, render need to also know what these variables values are. 
-9. Select the `Add Environment Variable` for each of the following
-| Key          | Value                                    |
-| ------------ | ---------------------------------------- |
-| DATABASE_URL | {use your connection string from bit.io} |
-| ENV          | "production"                             |
-| GO111MODULE  | on                                       |
-| GOPATH       | /opt/render/project/go                   |
-10. Finally we can click create Web Service and Render will build our project, provided we did everything correct we should have a successful deployment.
+Take a moment and celebrate, we have just built a full CRUD API using Golang, Gin, Gorm, and persiting our data using Bit.io. Hats off. 
+
+Ready to take it one step futher in the Bonus Round?
+
+# Bonus Round - Deployment
+
+Now that the app is built lets deploy it to render.com. Let's run some command in our terminal to prep our git repo, if you recall way back at the beginning we ran command `git init` this turned our project into a git repo. If you haven't been commiting your code, no worries we are going to do it together.
+
+First sequence of command will stage all of our files to be commited, followed by the actual commit with a message of "CRUD API".
+
+```bash
+git add .
+git commit -m "CRUD API"
+```
+
+Now we need to create a new repo on GitHub, so head over to your github dashboard and in the top right corner next to your avatar icon you will see a `+` sign select that and chose from the dropdown the `New Repository` option. 
+
+This will bring up the create a new repository screen we need to provide a name for the repo my suggestion would be "Kcanamar-GO-CRUD-API", but you can name it what ever you want.
+
+Make sure it is set to public, and *DO NOT* Select to add a README file, the only option you will need to change is provide a repo name. Go a head and smash the `Create Repository` button at the bottom of the page.
+
+This will take us to the code tab in our newly created repo, we are going to copy the bottom section of code, and paste it into our terminal.
+
+```bash
+git remote add origin {this will be you connection string}
+git branch -M main
+git push -u origin main
+```
+
+Go a head and refresh the page, and you will see you code on Github.
+
+### Moving on to Render
+
+Create a render.com account or login to your account.
+
+We are going to create a new web service, once you are on your dashboard look to the top of you screen and select the `New +` button and select `Web Service` this will promt you to signin to your github account, connecting your github to render, we need to do this.
+
+Armed with our newly created github repo, we can import our repo directly from github, scroll through the options until you find your project name and click connect.
+
+Render will ask you to give your porject a name.
+
+Now let's chose the advanced setting to set up our environment variables [_Check the Docs_](https://render.com/docs/environment-variables), We need to define our enviornment variables, so in YOUR local `.env` we have these variables defined. We do not have to define the `PORT` variable as render.com will do this for us.
+
+Select the `Add Environment Variable` for each of the following
+| Key          | Value                                    | Note |
+| ------------ | ---------------------------------------- | ---- |
+| DATABASE_URL | {use your connection string from bit.io} ||
+| ENV          | "production"                             ||
+| GO111MODULE  | on                                       |[_Check the Docs_](https://render.com/docs/environment-variables#go)|
+| GOPATH       | /opt/render/project/go                   |[_Check the Docs_](https://render.com/docs/environment-variables#go)|
+
+Finally we can click create Web Service and Render will build our project, provided we did everything correct we should have a successful deployment.
+
+# You did it!
+
+I you enjoyed this content or having any recommendations on what I could imporve or adjust please reach out to me through my [portfolio](https://kcanamar-portfolio.vercel.app/contact). 
+
+Follow me on [Twitter](https://twitter.com/funcy_koder) or connect with me through [Linkedin](https://www.linkedin.com/in/kyle-canamar/)
