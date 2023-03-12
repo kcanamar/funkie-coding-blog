@@ -765,9 +765,9 @@ Now, you guessed it, update our router in `main.go` with the new controller
 	router.POST("/posts", controllers.PostCreate)
 
 	// Update Route
-	r.PUT("/posts/:id", controllers.PostUpdate)
+	router.PUT("/posts/:id", controllers.PostUpdate)
 
-	r.GET("/posts/:id", controllers.PostShow)
+	router.GET("/posts/:id", controllers.PostShow)
 ...
 ```
 
@@ -810,13 +810,13 @@ Another one bites the dust, time to add out controller to our router in `main.go
 ```go
 // main.go
 ...
-	r.POST("/posts", controllers.PostCreate)
-	r.PUT("/posts/:id", controllers.PostUpdate)
+	router.POST("/posts", controllers.PostCreate)
+	router.PUT("/posts/:id", controllers.PostUpdate)
 	
 	// Delete Route
-	r.DELETE("/posts/:id", controllers.PostDestroy)
+	router.DELETE("/posts/:id", controllers.PostDestroy)
 
-	r.GET("/posts/:id", controllers.PostShow)
+	router.GET("/posts/:id", controllers.PostShow)
 ...
 ```
 
