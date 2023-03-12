@@ -1,7 +1,7 @@
 ---
 author: "KCanamar"
 date: "2023-03-08"
-title: "Building a CRUD API with Golang, Gin, Gorm, Bit.io, Bonus Deployment to Render.com"
+title: "Building a CRUD API with Golang, Gin, Gorm, Bit.io"
 lang: "Go"
 ---
 

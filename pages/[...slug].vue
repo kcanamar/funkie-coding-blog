@@ -10,7 +10,7 @@
 
     <ContentDoc class="" >
       <template v-slot="{ doc }">
-        <h2 class="text-2xl font-semibold">{{ doc.title }}</h2>
+          <h2 class="text-2xl font-semibold break-normal">{{ doc.title }}</h2>
         <p class="mb-8 text-gray-500">
           by, {{ doc.author }}, {{ doc.date }}
         </p>
